@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+.env.*
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# Data / models (keep small samples in data/sample)
+data/raw/*
+data/processed/*
+!data/sample/.gitkeep
+models/*
+!models/.gitkeep
+artifacts/*
+!artifacts/.gitkeep
+
+# VSCode / PyCharm
+.vscode/
+.idea/

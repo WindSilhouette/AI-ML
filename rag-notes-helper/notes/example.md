@@ -1,0 +1,1 @@
+# Example Note\n\nThis is a sample note to index.
