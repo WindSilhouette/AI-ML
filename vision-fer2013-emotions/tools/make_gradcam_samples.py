@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from torchvision import transforms
 from PIL import Image
-from .models import make_resnet18
-from .data import make_test_loader
+from src.models import make_resnet18
+from src.data import make_test_loader
 
 def gradcam(model, x, target_layer):
     """Generate Grad-CAM for a single image tensor x (1,C,H,W)."""
