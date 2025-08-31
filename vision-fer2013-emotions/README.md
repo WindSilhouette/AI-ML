@@ -55,6 +55,6 @@ vision-fer2013-emotions/
 <p float="left">
   <img src="docs/assets/sample_0_true-angry_pred-fear.png" width="200"/>
   <img src="docs/assets/sample_1_true-angry_pred-angry.png" width="200"/>
-  <img src="docs/assets/sample_2_true-angry_pred-happy.png" width="200"/>
-  <img src="docs/assets/sample_4_true-angry_pred-happy.png" width="200"/>
+  <img src="docs/assets/sample_2_true-angry_pred-fear.png" width="200"/>
+  <img src="docs/assets/sample_4_true-angry_pred-angry.png" width="200"/>
 </p>
