@@ -27,7 +27,8 @@ def gradcam(model, x, target_layer):
     w = (w - w.min()) / (w.max() - w.min() + 1e-8)
 
     handle_fwd.remove(); handle_bwd.remove()
-    return cls, w[0,0].cpu().numpy()
+    return cls, w[0,0].detach().cpu().numpy()
+
 
 def overlay(img, mask):
     """Overlay heatmap on image (PIL grayscale to RGB)."""
