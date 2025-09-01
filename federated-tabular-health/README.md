@@ -1,44 +1,51 @@
-# Federated Tabular Health (Privacy-Preserving ML)
+# Federated Tabular Health
 
-**What it is**: Train a model across multiple 'clinics' without centralizing data. Simulate 3–5 clients, compare FedAvg vs centralized baseline on a public tabular dataset.
-
-**Tech stack**: Python 3.11, PyTorch, scikit-learn, Flower (flwr), pandas, pytest
-
-## Why this project stands out
-- Real‑world relevance and clean architecture
-- Reproducible experiments + unit tests
-- Clear benchmarks and ablations
-
-## How you'd build it (quick logic explainer)
-1. **Define the problem** → pick metrics that matter (accuracy, F1, AUROC, latency).
-2. **Design the pipeline** → split into modular steps with typed I/O.
-3. **Implement a minimal end‑to‑end path** → a tiny dataset sample processed by all stages.
-4. **Instrument & test** → unit tests for each module and CI checks.
-5. **Iterate** → add ablations/baselines; document tradeoffs in `REPORT.md`.
-
-## Setup
-```bash
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-pytest -q
-```
-
-## Repo structure
-```
-federated-tabular-health/
-  ├─ src/
-  │   └─ __init__.py
-  ├─ tests/
-  │   └─ test_smoke.py
-  ├─ data/
-  │   └─ sample/  # tiny sample to make the pipeline runnable
-  ├─ models/      # saved weights
-  ├─ artifacts/   # figs, logs, reports
-  ├─ requirements.txt
-  ├─ ROADMAP.md
-  ├─ REPORT.md
-  ├─ LICENSE
-  └─ .gitignore
-```
+A federated learning project that simulates multiple hospitals collaboratively training a model on **synthetic patient data** without sharing raw records.  
+Built with **PyTorch** + **Flower (FL)**.
 
 ---
+
+## 🚀 Features
+- Synthetic health dataset generator (age, BMI, vitals, labs, sex → binary outcome).
+- Federated setup with **non-IID client splits**.
+- Baselines: centralized (upper bound) vs local-only training.
+- Federated training with **FedAvg** aggregation.
+- Extendable with **Differential Privacy** (Opacus).
+
+---
+
+## 📂 Project Structure
+federated-tabular-health/
+├── README.md
+├── requirements.txt
+├── .gitignore
+└── src/
+├── data_gen.py # synthetic dataset generator
+├── dataset.py # PyTorch Dataset + loaders
+├── model.py # MLP for tabular data
+├── metrics.py # accuracy & AUC
+├── utils.py # training loop helper
+├── client_flower.py # client logic for Flower
+├── server_flower.py # server logic for Flower
+├── run_federated.py # orchestrates FL run
+└── run_baselines.py # centralized & local-only baselines
+
+
+---
+
+## ⚡ Quickstart
+
+### 1. Setup environment
+```bash
+# Create and activate venv
+python -m venv .venv
+.venv\Scripts\activate   # Windows PowerShell
+# OR: source .venv/bin/activate  # Linux/Mac
+
+# Install dependencies
+pip install -r requirements.txt
+
+python -m src.data_gen
+python -m src.run_federated
+python -m src.run_baselines
+

@@ -1,24 +1,28 @@
-# Python
+# Python cache
 __pycache__/
-*.py[cod]
-*.egg-info/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
 .venv/
-.env
-.env.*
+env/
+venv/
+
+# Data & models
+data/
+models/
+artifacts/
+
+# Logs / temp
+*.log
+*.tmp
+*.swp
+
+# Jupyter/Colab
 .ipynb_checkpoints/
+*.ipynb
 
-# OS
+# OS-specific
 .DS_Store
-
-# Data / models (keep small samples in data/sample)
-data/raw/*
-data/processed/*
-!data/sample/.gitkeep
-models/*
-!models/.gitkeep
-artifacts/*
-!artifacts/.gitkeep
-
-# VSCode / PyCharm
-.vscode/
-.idea/
+Thumbs.db
