@@ -1,20 +1,46 @@
-import pandas as pd, torch
-from torch.utils.data import Dataset, DataLoader, random_split
+import pandas as pd
+import torch
+from torch.utils.data import TensorDataset, DataLoader
 
-FEATURES = ["age","bmi","hr","sbp","dbp","chol","sex"]
+# Expected feature order for synthetic health data
+DEFAULT_FEATURES = ["age", "bmi", "hr", "sbp", "dbp", "chol", "sex"]
+LABEL_COL = "label"
 
-class TabularDS(Dataset):
-    def __init__(self, csv_path):
-        df = pd.read_csv(csv_path)
-        self.X = torch.tensor(df[FEATURES].values, dtype=torch.float32)
-        self.y = torch.tensor(df["label"].values, dtype=torch.long)
-    def __len__(self): return len(self.y)
-    def __getitem__(self, i): return self.X[i], self.y[i]
 
-def make_loaders(csv_path, batch_size=64, val_frac=0.2):
-    ds = TabularDS(csv_path)
-    n_val = int(len(ds)*val_frac)
-    n_train = len(ds)-n_val
-    tr, va = random_split(ds, [n_train, n_val], generator=torch.Generator().manual_seed(42))
-    return (DataLoader(tr, batch_size=batch_size, shuffle=True),
-            DataLoader(va, batch_size=batch_size, shuffle=False))
+def _load_xy(csv_path: str):
+    df = pd.read_csv(csv_path)
+
+    # --- Find label column ---
+    label_col = None
+    for alt in [LABEL_COL, "y", "target", "Label"]:
+        if alt in df.columns:
+            label_col = alt
+            break
+    if label_col is None:
+        raise ValueError(f"No label/target column found in {csv_path}")
+
+    # --- Pick feature columns ---
+    feats = [c for c in DEFAULT_FEATURES if c in df.columns]
+    if not feats:  # fallback: all numeric except label
+        feats = [c for c in df.select_dtypes(include=["number"]).columns if c != label_col]
+
+    # --- Convert to tensors ---
+    X = torch.tensor(df[feats].values, dtype=torch.float32)
+    y = torch.tensor(df[label_col].values, dtype=torch.long)
+
+    return X, y
+
+
+def make_dataloader(
+    csv_path: str, batch_size: int = 64, shuffle: bool = True, num_workers: int = 0
+) -> DataLoader:
+    """
+    Create a PyTorch DataLoader from a CSV file.
+
+    The CSV should contain a label column (default 'label') and feature columns.
+    If the default feature set is not present, all numeric columns except the label are used.
+    """
+    X, y = _load_xy(csv_path)
+    ds = TensorDataset(X, y)
+    dl = DataLoader(ds, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    return dl

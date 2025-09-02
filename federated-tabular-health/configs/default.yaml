@@ -1,0 +1,12 @@
+seed: 42
+data:
+  n_clients: 5
+  n_per_client: 300
+  out_dir: "data"
+train:
+  epochs: 5
+  batch_size: 64
+  lr: 0.001
+federated:
+  server_address: "127.0.0.1:8080"
+
