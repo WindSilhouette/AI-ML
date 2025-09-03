@@ -1,28 +1,27 @@
-# Python cache
+# Byte-compiled / cache
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
+.pytest_cache/
+.ipynb_checkpoints/
 
-# Virtual environment
+# Virtual envs
 .venv/
 env/
 venv/
 
-# Data & models
+# Data & runs
 data/
-models/
-artifacts/
+runs/
 
-# Logs / temp
-*.log
-*.tmp
-*.swp
-
-# Jupyter/Colab
-.ipynb_checkpoints/
-*.ipynb
-
-# OS-specific
+# OS / IDE
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
+
+# Build
+build/
+dist/
+*.egg-info/
