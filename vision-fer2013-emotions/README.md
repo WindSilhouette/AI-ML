@@ -5,7 +5,7 @@ augmentations, and explainability (Grad-CAM).
 
 **Tech stack**: Python 3.11, PyTorch, TorchVision, Albumentations, scikit-learn, pytest
 
-## Why this project stands out
+## Project Features
 - Clear baselines: small CNN vs. transfer learning (ResNet18)
 - Reproducible: fixed seeds, stratified splits, test-only once
 - Explainability: Grad-CAM heatmaps for sample images

@@ -1,7 +1,7 @@
 
 # Federated Tabular Health
 
-> A tidy, portfolio-ready **federated learning** demo using **Flower** + **PyTorch** on synthetic, **non‑IID** tabular health data.  
+> A **federated learning** demo using **Flower** + **PyTorch** on synthetic, **non‑IID** tabular health data.  
 > Runs locally (safe by default), logs metrics per run, and includes tests, CI, and plotting utilities.
 
 <p align="left">
@@ -10,7 +10,7 @@
   <img alt="OS" src="https://img.shields.io/badge/OS-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey">
 </p>
 
-## Why this project?
+## Project Features
 - **Clear FL pipeline**: centralized vs local‑only vs FedAvg (Flower)
 - **Reproducible**: seeded, config‑driven, with minimal tests and CI
 - **Explainable**: simple MLP on synthetic tabular features
