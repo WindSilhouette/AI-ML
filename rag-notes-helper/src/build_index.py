@@ -1,47 +1,90 @@
-# src/build_index.py
-"""Build a FAISS index from Markdown/PDF notes.
-Logic: Chunk text -> embed -> store vectors + metadata.
-"""
-import os, glob
+import argparse, json
 from pathlib import Path
-from typing import List
 from sentence_transformers import SentenceTransformer
-import faiss
-import numpy as np
+import faiss, numpy as np
+from pypdf import PdfReader
+from pypdf.errors import PdfReadError, PdfStreamError
 
-def read_texts(notes_dir: str) -> List[str]:
-    texts = []
-    for path in glob.glob(os.path.join(notes_dir, "**/*.md"), recursive=True):
-        with open(path, "r", encoding="utf-8") as f:
-            texts.append(f.read())
-    return texts
+# Config
+EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+CHUNK_SIZE = 500
+CHUNK_OVERLAP = 100
 
-def chunk_text(text: str, size=400, overlap=40):
-    tokens = text.split()
+
+
+def normalize_text(text: str) -> str:
+    text = text.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\t", " ")
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    return "\n".join(line.rstrip() for line in text.split("\n"))
+
+def read_file(path: Path) -> str:
+    ext = path.suffix.lower()
+    if ext in [".txt", ".md"]:
+        return normalize_text(path.read_text(encoding="utf-8", errors="ignore"))
+
+    if ext == ".pdf":
+        try:
+            reader = PdfReader(str(path))
+            raw = "\n".join((page.extract_text() or "") for page in reader.pages)
+            return normalize_text(raw)
+        except (PdfReadError, PdfStreamError, OSError, ValueError):
+            # Not a valid PDF — skip by returning empty to ignore this file
+            print(f"[warn] Skipping invalid PDF: {path}")
+            return ""
+
+    # Unknown extension => skip
+    return ""
+
+
+
+def chunk_text(text: str, chunk_chars: int = CHUNK_SIZE * 6, overlap_chars: int = CHUNK_OVERLAP * 6):
+
+    if not text:
+        return []
     chunks = []
-    i = 0
-    while i < len(tokens):
-        chunk = tokens[i:i+size]
-        chunks.append(" ".join(chunk))
-        i += size - overlap
+    n = len(text)
+    start = 0
+    while start < n:
+        end = min(start + chunk_chars, n)
+        # try not to cut in the middle of a line: extend to next newline if close
+        if end < n:
+            nl = text.rfind("\n", start, end)  # prefer to break at the last newline before end
+            if nl != -1 and end - nl < 120:    # if a newline is reasonably close, break there
+                end = nl + 1
+        chunk = text[start:end]
+        chunks.append(chunk)
+        if end == n:
+            break
+        start = max(0, end - overlap_chars)
     return chunks
 
-def build(notes_dir: str, out_dir: str):
-    os.makedirs(out_dir, exist_ok=True)
-    model = SentenceTransformer("all-MiniLM-L6-v2")
-    docs = []
-    for t in read_texts(notes_dir):
-        docs.extend(chunk_text(t))
-    if not docs:
-        raise SystemExit("No documents found.")
-    embs = model.encode(docs, convert_to_numpy=True, show_progress_bar=False)
-    index = faiss.IndexFlatIP(embs.shape[1])
-    faiss.normalize_L2(embs)
-    index.add(embs)
-    np.save(os.path.join(out_dir, "embs.npy"), embs)
-    with open(os.path.join(out_dir, "docs.json"), "w", encoding="utf-8") as f:
-        import json; json.dump(docs, f)
-    faiss.write_index(index, os.path.join(out_dir, "faiss.index"))
+def build_index(notes_dir: Path, index_dir: Path):
+    model = SentenceTransformer(EMBED_MODEL)
+    docs, metas, chunks = [], [], []
+
+    for path in notes_dir.rglob("*"):
+        if path.is_file():
+            text = read_file(path)
+            for i, chunk in enumerate(chunk_text(text)):
+                chunks.append(chunk)
+                metas.append({"path": str(path), "chunk_id": i})
+
+    X = model.encode(chunks, convert_to_numpy=True, show_progress_bar=True)
+    faiss.normalize_L2(X)
+    index = faiss.IndexFlatIP(X.shape[1])
+    index.add(X)
+
+    index_dir.mkdir(parents=True, exist_ok=True)
+    faiss.write_index(index, str(index_dir / "faiss.index"))
+    np.save(index_dir / "vecs.npy", X)
+    (index_dir / "chunks.json").write_text(json.dumps(chunks, indent=2), encoding="utf-8")
+    (index_dir / "meta.json").write_text(json.dumps(metas, indent=2), encoding="utf-8")
+
+    print(f"Built index with {len(chunks)} chunks from {len(metas)} docs.")
 
 if __name__ == "__main__":
-    build("notes", "artifacts/index")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--notes_dir", default="notes")
+    ap.add_argument("--index_dir", default="artifacts/index")
+    args = ap.parse_args()
+    build_index(Path(args.notes_dir), Path(args.index_dir))

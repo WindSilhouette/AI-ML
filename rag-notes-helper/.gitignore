@@ -1,24 +1,42 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+*.so
 *.egg-info/
+dist/
+build/
 .venv/
 .env
 .env.*
+
+# Notebooks
 .ipynb_checkpoints/
+*.ipynb_convert/
 
 # OS
 .DS_Store
+Thumbs.db
 
-# Data / models (keep small samples in data/sample)
+# Data / models (keep small samples only)
 data/raw/*
 data/processed/*
 !data/sample/.gitkeep
+
 models/*
 !models/.gitkeep
+
 artifacts/*
 !artifacts/.gitkeep
 
-# VSCode / PyCharm
+# Logs and reports
+logs/
+*.log
+*.out
+*.err
+
+# VSCode / PyCharm / IDE
 .vscode/
 .idea/
+*.iml

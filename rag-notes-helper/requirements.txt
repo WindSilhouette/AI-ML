@@ -1,9 +1,7 @@
 faiss-cpu>=1.8
-transformers>=4.42
 sentence-transformers>=3.0
+pypdf>=4.0
 fastapi>=0.110
 uvicorn>=0.30
-pydantic>=2.7
 numpy>=1.26
-pandas>=2.2
 pytest>=8.0
